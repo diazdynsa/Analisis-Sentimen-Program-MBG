@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentimen AI | Program MBG</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --color-indigo: #4f46e5;
+            --color-teal: #06b6d4;
+            --border-light: #e2e8f0;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Decor */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(6, 182, 212, 0.05));
+            border-bottom: 1px solid var(--border-light);
+            padding: 3.5rem 0 2.5rem 0;
+            margin-bottom: 2.5rem;
+        }
+
+        .brand-title {
+            font-weight: 800;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--color-indigo), var(--color-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-badge {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .stats-val { font-weight: 700; color: var(--color-indigo); font-size: 1.1rem; }
+        .stats-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .btn-scroll {
+            background: #fff;
+            color: var(--color-indigo);
+            border: 1px solid var(--border-light);
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 8px 20px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .btn-scroll:hover {
+            background: var(--color-indigo);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Panel Styling */
+        .clean-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2.2rem;
+            height: 100%;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Form & Button Saraf */
+        .form-control {
+            background-color: #f1f5f9;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1rem;
+            padding-right: 2.5rem; /* Space for clear button */
+        }
+
+        .form-control:focus {
+            background-color: #fff;
+            border-color: var(--color-indigo);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-cyber {
+            background: linear-gradient(45deg, var(--color-indigo), var(--color-teal));
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cyber::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: all 0.6s ease;
+            z-index: -1;
+        }
+
+        .btn-cyber:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.3);
+            color: #fff;
+        }
+
+        .btn-cyber:hover::before { left: 100%; }
+        
+        .btn-cyber.disabled {
+            opacity: 0.8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Quick Chips */
+        .quick-chip {
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .quick-chip:hover {
+            background-color: var(--color-indigo);
+            color: white !important;
+            border-color: var(--color-indigo);
+        }
+
+        /* Result Area */
+        .result-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 16px;
+            border-left: 8px solid;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Logic Sentimen */
+        {% set border_color = '#94a3b8' %}{% set bg_res = '#f8fafc' %}
+        {% if hasil == 'Positif' %}{% set border_color = '#10b981' %}{% set bg_res = '#f0fdf4' %}
+        {% elif hasil == 'Negatif' %}{% set border_color = '#ef4444' %}{% set bg_res = '#fef2f2' %}{% endif %}
+
+        .sentiment-res { border-left-color: {{ border_color }}; background-color: {{ bg_res }}; }
+
+        .keyword-badge {
+            background: rgba(79, 70, 229, 0.08);
+            color: var(--color-indigo);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        .viz-img {
+            border-radius: 16px;
+            width: 100%;
+            border: 1px solid var(--border-light);
+            background: #fff;
+            transition: transform 0.3s ease;
+        }
+        .viz-img:hover { transform: translateY(-5px); }
+
+        /* Footer */
+        .footer-custom {
+            margin-top: auto;
+            border-top: 1px solid var(--border-light);
+            padding: 2rem 0;
+            background-color: var(--bg-card);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="brand-title">Sentimen AI: Program MBG</h1>
+                    <p class="text-muted mb-3">Pantau opini publik secara presisi menggunakan model <strong>Deep Learning LSTM</strong>.</p>
+                    <a href="#visualisasi" class="btn-scroll">↓ Cek Visualisasi Data</a>
+                </div>
+                <div class="col-lg-5 mt-4 mt-lg-0">
+                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                        <div class="stats-badge">
+                            <div><div class="stats-label">Dataset</div><div class="stats-val">8.4K+</div></div>
+                        </div>
+                        <div class="stats-badge">
+                            <div><div class="stats-label">Accuracy</div><div class="stats-val">86.8%</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5 flex-grow-1">
+        
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-9">
+                <div class="clean-panel">
+                    <h4 class="mb-2">Uji Sentimen Real-Time</h4>
+                    <p class="text-muted small mb-4">Analisis emosi dan polaritas teks dalam hitungan detik.</p>
+                    
+                    <form id="analyzeForm" action="/predict" method="POST">
+                        <div class="mb-3 position-relative">
+                            <textarea id="mainTextArea" name="text_input" class="form-control" rows="4" placeholder="Ketik komentar di sini..." required>{{ text_input if text_input else '' }}</textarea>
+                            <button type="button" id="clearBtn" class="btn btn-sm btn-light position-absolute shadow-sm" style="top: 12px; right: 12px; border-radius: 50%; width: 28px; height: 28px; padding: 0; display: none; font-weight: bold; color: #64748b; border: 1px solid #e2e8f0; line-height: 1;">✕</button>
+                        </div>
+                        
+                        <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+                            <span class="text-muted" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">COBA CEPAT:</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill quick-chip" data-text="Program makan bergizi ini sangat bermanfaat bagi siswa kurang mampu di daerah terpencil.">Pujian</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill quick-chip" data-text="Anggarannya rawan dikorupsi oleh pejabat daerah, pengawasannya sangat lemah!">Kritik</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill quick-chip" data-text="Pemerintah mengalokasikan dana 71 triliun untuk program MBG tahun 2026.">Fakta/Netral</button>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn btn-cyber w-100">JALANKAN ANALISIS SARAF</button>
+                    </form>
+
+                    {% if hasil %}
+                    <div class="result-container sentiment-res">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0" style="color: {{ border_color }};">STATUS: <strong>{{ hasil|upper }}</strong></h5>
+                            <span class="fw-bold">{{ skor }}% Confident</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 8px; border-radius: 10px; background: #e2e8f0;">
+                            <div class="progress-bar" style="width: {{ skor }}%; background: {{ border_color }};"></div>
+                        </div>
+                        {% if keywords %}
+                            <div class="mt-3">
+                                <small class="text-muted d-block mb-1 fw-bold">KATA KUNCI:</small>
+                                {% for word in keywords %}<span class="keyword-badge">#{{ word }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="visualisasi">
+            <div class="col-12">
+                <div class="clean-panel">
+                    <h4 class="mb-4">Eksplorasi Data Nasional</h4>
+                    <div class="row g-4">
+                        <div class="col-md-6 text-center">
+                            <p class="text-muted fw-bold small mb-2">POLARITAS KOMUNITAS</p>
+                            <img src="{{ url_for('static', filename='images/grafik_distribusi_sentimen.png') }}" class="viz-img" alt="Bar Chart">
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <p class="text-muted fw-bold small mb-2">DOMINASI TOPIK (WORDCLOUD)</p>
+                            <img src="{{ url_for('static', filename='images/wordcloud_mbg_bersih.png') }}" class="viz-img" alt="WordCloud">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="footer-custom text-center">
+        <p class="mb-1" style="font-weight: 700; color: var(--text-main);">Sentimen AI Tracker &copy; 2026</p>
+        <p class="mb-0 text-muted" style="font-size: 0.85rem;">Dikembangkan menggunakan arsitektur Long Short-Term Memory (LSTM) TensorFlow.</p>
+    </footer>
+
+    <script>
+        // Loading State Button
+        document.getElementById('analyzeForm').addEventListener('submit', function() {
+            var btn = document.getElementById('submitBtn');
+            btn.classList.add('disabled');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> SEDANG MEMPROSES...';
+        });
+
+        // Quick Test Chips & Clear Button Logic
+        const textArea = document.getElementById('mainTextArea');
+        const clearBtn = document.getElementById('clearBtn');
+        
+        document.querySelectorAll('.quick-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                textArea.value = this.getAttribute('data-text');
+                toggleClearBtn();
+            });
+        });
+
+        function toggleClearBtn() {
+            clearBtn.style.display = textArea.value.length > 0 ? 'block' : 'none';
+        }
+        
+        textArea.addEventListener('input', toggleClearBtn);
+        window.addEventListener('load', toggleClearBtn);
+
+        clearBtn.addEventListener('click', function() {
+            textArea.value = '';
+            toggleClearBtn();
+            textArea.focus();
+        });
+    </script>
+</body>
+</html>
