@@ -1,0 +1,10 @@
+{
+      engines {
+        node 18.x
+      }
+    }
+    ```
+    Save file-nya.
+  
+  
+    Lakukan commit dan push ulang ke repositori GitHub lo. File `package.json` ini akan dibaca pertama kali oleh Vercel.
